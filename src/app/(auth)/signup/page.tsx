@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { APP_NAME } from "@/lib/constants";
 
 export default function SignUpPage() {
@@ -103,17 +104,16 @@ export default function SignUpPage() {
             placeholder="you@example.com"
             required
           />
-          <Input
+          <PasswordInput
             label="Password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 8 characters"
             required
+            helperText="Minimum 8 characters"
           />
-          <Input
+          <PasswordInput
             label="Confirm Password"
-            type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm your password"

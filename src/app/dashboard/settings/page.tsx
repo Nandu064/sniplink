@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -20,14 +20,23 @@ interface UserProfile {
 
 function UpgradeSuccessHandler() {
   const searchParams = useSearchParams();
+  const { update } = useSession();
   useEffect(() => {
     if (searchParams.get("upgraded") === "true") {
-      showSuccess("You're now on Pro! Welcome to Sniplink Pro.");
-      const url = new URL(window.location.href);
-      url.searchParams.delete("upgraded");
-      window.history.replaceState({}, "", url.toString());
+      // Verify subscription with Stripe and sync plan to DB
+      fetch("/api/billing/verify", { method: "POST" })
+        .then(() => update()) // Refresh JWT session so plan is current
+        .then(() => {
+          showSuccess("🎉 You're now on Pro! Welcome to Sniplink Pro.");
+          const url = new URL(window.location.href);
+          url.searchParams.delete("upgraded");
+          window.history.replaceState({}, "", url.toString());
+          window.location.reload(); // Reload so UI reflects new plan
+        })
+        .catch(() => showSuccess("Payment successful! Refresh the page to see your Pro status."));
     }
-  }, [searchParams]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return null;
 }
 

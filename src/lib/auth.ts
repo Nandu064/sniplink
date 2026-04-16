@@ -40,6 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user._id.toString(),
           name: user.name,
           email: user.email,
+          plan: user.plan ?? "free",
         };
       },
     }),
@@ -52,15 +53,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/error",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id!;
+        token.plan = (user as { plan?: string }).plan ?? "free";
+      }
+      // Re-fetch plan from DB when session is manually updated (e.g. after upgrade)
+      if (trigger === "update" && token.id) {
+        try {
+          await connectDB();
+          const freshUser = await User.findById(token.id).lean();
+          if (freshUser) token.plan = freshUser.plan ?? "free";
+        } catch { /* ignore */ }
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.plan = (token.plan as string) ?? "free";
       }
       return session;
     },

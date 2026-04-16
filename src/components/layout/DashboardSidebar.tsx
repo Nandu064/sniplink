@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { APP_NAME } from "@/lib/constants";
 
@@ -44,6 +45,18 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ open, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const [plan, setPlan] = useState<string>("free");
+
+  useEffect(() => {
+    // Fetch fresh plan from API — session token may be stale
+    fetch("/api/user")
+      .then((r) => r.json())
+      .then((d) => { if (d.plan) setPlan(d.plan); })
+      .catch(() => {});
+  }, [session?.user?.id]);
+
+  const isPro = plan === "pro";
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -79,7 +92,26 @@ export function DashboardSidebar({ open, onClose }: DashboardSidebarProps) {
         })}
       </nav>
 
-      <div className="px-3 py-4 border-t border-slate-200">
+      <div className="px-3 py-4 border-t border-slate-200 space-y-2">
+        {/* Plan badge */}
+        {isPro ? (
+          <div className="mx-1 px-3 py-2 rounded-lg bg-violet-600 text-white text-xs flex items-center gap-2">
+            <svg className="h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span className="font-semibold">Pro Plan</span>
+          </div>
+        ) : (
+          <Link
+            href="/pricing"
+            className="mx-1 px-3 py-2 rounded-lg bg-violet-50 border border-violet-200 text-violet-700 text-xs flex items-center gap-2 hover:bg-violet-100 transition-colors"
+          >
+            <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
+            </svg>
+            <span className="font-medium">Upgrade to Pro</span>
+          </Link>
+        )}
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
           className="flex items-center gap-3 px-4 py-2.5 rounded-md text-sm text-slate-600 hover:bg-slate-50 w-full transition-colors"

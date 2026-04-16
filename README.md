@@ -2,9 +2,9 @@
 
 # Sniplink
 
-### Modern URL Shortener with Real-Time Analytics
+### Modern URL Shortener with Real-Time Analytics & AI
 
-A production-ready, SEO-optimized URL shortener built with Next.js 16, MongoDB, and TypeScript. Shorten URLs, track clicks globally, and gain insights with detailed analytics dashboards.
+A production-ready, full-stack URL shortener built with Next.js 16, MongoDB, and TypeScript. Shorten URLs, protect them with passwords, generate QR codes, get AI-powered slug suggestions, publish a Link-in-Bio page, and gain insights with detailed analytics dashboards.
 
 [Live Demo](https://sniplink-green.vercel.app) &middot; [Report Bug](https://github.com/Nandu064/sniplink/issues) &middot; [Request Feature](https://github.com/Nandu064/sniplink/issues)
 
@@ -14,12 +14,32 @@ A production-ready, SEO-optimized URL shortener built with Next.js 16, MongoDB, 
 
 ## Features
 
+### Core
 - **Instant URL Shortening** &mdash; Generate 7-character short links or use custom aliases
-- **Real-Time Click Analytics** &mdash; Track every click with detailed breakdowns
-- **Geographic Insights** &mdash; Country and city-level visitor tracking
-- **Device & Browser Analytics** &mdash; Know your audience across desktop, mobile, and tablet
-- **Referrer Tracking** &mdash; See where your traffic comes from
-- **Link Management** &mdash; Create, edit, expire, and delete links from a clean dashboard
+- **Link Expiration** &mdash; Set an expiry date; links auto-deactivate after the deadline
+- **Password-Protected Links** &mdash; Visitors must enter a password before being redirected
+- **QR Code Generation** &mdash; Download violet-branded QR codes as PNG or SVG for any link
+
+### AI
+- **✨ AI Slug Suggestions** &mdash; One click generates 3 smart, descriptive slugs via Claude AI (Haiku)
+
+### Analytics
+- **Real-Time Click Analytics** &mdash; Track every click with timeline charts
+- **Geographic Insights** &mdash; Country and city-level visitor tracking via Vercel geo headers
+- **Device & Browser Analytics** &mdash; Desktop, mobile, and tablet breakdowns
+- **Referrer Tracking** &mdash; See exactly where your traffic comes from
+
+### Link-in-Bio
+- **Public Profile Page** &mdash; Share all your pinned links at `/u/yourusername`
+- **Pin Links** &mdash; Toggle any link to appear on your bio page
+- **Custom Username & Bio** &mdash; Set a display name, handle, and bio from Settings
+
+### Monetization
+- **Stripe Billing** &mdash; Free and Pro plans with Stripe Checkout and Customer Portal
+- **Webhook Sync** &mdash; Plan upgrades/downgrades sync automatically via Stripe webhooks
+- **Real-time Plan Status** &mdash; Sidebar and settings reflect Pro status immediately after upgrade
+
+### Platform
 - **Authentication System** &mdash; Email/password auth with secure password reset via email
 - **Rate Limiting** &mdash; IP-based rate limiting on all API endpoints
 - **SEO Optimized** &mdash; Dynamic OG images, JSON-LD schemas, sitemap, robots.txt
@@ -33,6 +53,8 @@ A production-ready, SEO-optimized URL shortener built with Next.js 16, MongoDB, 
 <!-- ![Dashboard](screenshots/dashboard.png) -->
 <!-- ![Analytics](screenshots/analytics.png) -->
 <!-- ![Landing Page](screenshots/landing.png) -->
+<!-- ![Link-in-Bio](screenshots/bio.png) -->
+<!-- ![QR Code Modal](screenshots/qr.png) -->
 
 ---
 
@@ -48,6 +70,10 @@ A production-ready, SEO-optimized URL shortener built with Next.js 16, MongoDB, 
 | **Charts** | Recharts |
 | **Validation** | Zod 4 |
 | **Email** | Nodemailer (Gmail SMTP) |
+| **AI** | Anthropic Claude (Haiku) |
+| **Payments** | Stripe (Checkout + Webhooks) |
+| **QR Codes** | qrcode (Node.js) |
+| **Password Hashing** | bcryptjs |
 | **Notifications** | SweetAlert2 |
 | **Deployment** | Vercel |
 
@@ -65,10 +91,11 @@ A production-ready, SEO-optimized URL shortener built with Next.js 16, MongoDB, 
 ├─────────────────────────────────────────────────────────┤
 │                     API Routes                          │
 │  REST APIs  ·  Rate Limiting  ·  Zod Validation        │
-├──────────────────────┬──────────────────────────────────┤
-│    Authentication    │         Services                 │
-│  NextAuth v5 (JWT)   │  Analytics · Email · Hashing    │
-├──────────────────────┴──────────────────────────────────┤
+├───────────────┬──────────────────┬──────────────────────┤
+│ Authentication│    Services      │    Integrations      │
+│ NextAuth v5   │ Analytics · Email│ Stripe · Claude AI   │
+│ (JWT + plan)  │ QR · Hashing     │ Webhooks · Billing   │
+├───────────────┴──────────────────┴──────────────────────┤
 │                    Data Layer                           │
 │  MongoDB Atlas  ·  Mongoose ODM  ·  Aggregation Pipes  │
 └─────────────────────────────────────────────────────────┘
@@ -77,20 +104,22 @@ A production-ready, SEO-optimized URL shortener built with Next.js 16, MongoDB, 
 ### How Short Links Work
 
 ```
-User creates link → MongoDB stores slug + URL
+User creates link → MongoDB stores slug + URL + options
                          │
-Visitor hits /abc123 → Edge Middleware intercepts
+Visitor hits /abc123 → Slug route intercepts
                          │
-          ┌──────────────┴──────────────┐
-          │                             │
-   Resolve slug → URL            Fire-and-forget
-          │                      click tracking
-   301 Redirect                        │
-   (instant)               Store: IP hash, UA,
-                           geo, referrer, device
-                                       │
-                           Dashboard aggregates
-                           via MongoDB pipelines
+          ┌──────────────┴──────────────────┐
+          │                                 │
+   Password protected?              Fire-and-forget
+     │          │                   click tracking
+    Yes         No                       │
+     │          │              Store: IP hash, UA,
+     ▼          ▼              geo, referrer, device
+  /protected  Link expired?               │
+  entry page    │                Dashboard aggregates
+                No                via MongoDB pipelines
+                │
+          301 Redirect (instant)
 ```
 
 ---
@@ -102,6 +131,8 @@ Visitor hits /abc123 → Edge Middleware intercepts
 - **Node.js** 18.17 or later
 - **MongoDB Atlas** account ([free tier](https://www.mongodb.com/cloud/atlas))
 - **Gmail account** with App Password (for password reset emails)
+- **Anthropic account** (for AI slug suggestions — free credits on signup)
+- **Stripe account** (for billing — test mode is free)
 
 ### Installation
 
@@ -137,6 +168,15 @@ SMTP_SECURE=false
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-16-char-app-password
 SMTP_FROM=your-email@gmail.com
+
+# AI Slug Suggestions — console.anthropic.com
+ANTHROPIC_API_KEY=sk-ant-api03-...
+
+# Stripe Billing — dashboard.stripe.com
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRO_PRICE_ID=price_...
 ```
 
 <details>
@@ -147,6 +187,22 @@ SMTP_FROM=your-email@gmail.com
 3. Go to [App Passwords](https://myaccount.google.com/apppasswords)
 4. Create a new app password and copy the 16-character code
 5. Use it as `SMTP_PASS` in your `.env.local`
+
+</details>
+
+<details>
+<summary><strong>How to set up Stripe</strong></summary>
+
+1. Create a free account at [dashboard.stripe.com](https://dashboard.stripe.com)
+2. Stay in **Test mode**
+3. Go to **Developers → API keys** → copy `sk_test_...` and `pk_test_...`
+4. Go to **Product catalog → Add product** → set $9/month recurring → copy the `price_...` ID
+5. Go to **Developers → Webhooks → Add destination** → paste your URL + select events:
+   - `checkout.session.completed`
+   - `customer.subscription.deleted`
+6. Copy the `whsec_...` signing secret
+
+> For local webhook testing: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
 
 </details>
 
@@ -173,27 +229,33 @@ npm start
 src/
 ├── app/                          # Next.js App Router
 │   ├── (auth)/                   # Auth pages (signin, signup, forgot/reset password)
-│   ├── (marketing)/              # Public pages (about, features, pricing)
+│   ├── (marketing)/              # Public pages (about, features, pricing, privacy, terms)
 │   ├── dashboard/                # Protected dashboard pages
-│   │   ├── links/[id]/           # Link analytics page
-│   │   ├── new/                  # Create new link
-│   │   └── settings/             # User profile & settings
-│   ├── api/                      # REST API routes
-│   │   ├── auth/                 # Auth endpoints (signup, forgot/reset password)
-│   │   ├── links/                # CRUD + resolve endpoints
+│   │   ├── links/[id]/           # Link analytics + QR code
+│   │   ├── new/                  # Create new link (with AI slugs + password option)
+│   │   └── settings/             # Profile, Link-in-Bio, billing, password
+│   ├── api/
+│   │   ├── ai/suggest-slug/      # Claude AI slug suggestions
 │   │   ├── analytics/            # Analytics aggregation
+│   │   ├── auth/                 # Signup, forgot/reset password
+│   │   ├── billing/              # Stripe checkout, portal, verify
+│   │   ├── links/                # CRUD, QR, pin, check-password
 │   │   ├── track/                # Click tracking
-│   │   └── user/                 # User profile management
-│   └── [slug]/                   # Dynamic short link handler
+│   │   ├── user/                 # Profile, public username routes
+│   │   └── webhooks/stripe/      # Stripe event handler
+│   ├── protected/[slug]/         # Password entry page
+│   ├── u/[username]/             # Public Link-in-Bio page
+│   └── [slug]/                   # Short link redirect handler
 ├── components/
-│   ├── features/                 # Business logic (ShortenForm, LinkTable, Charts)
-│   ├── layout/                   # Header, Footer, Sidebar, Nav
-│   ├── ui/                       # Reusable primitives (Button, Input, Card, Table)
-│   ├── providers/                # Context providers (Session)
+│   ├── features/                 # ShortenForm, LinkTable, Charts, QRCodeModal
+│   ├── layout/                   # Header, Footer, Sidebar (with plan badge), Nav
+│   ├── ui/                       # Button, Input, PasswordInput, Card, Table, etc.
+│   ├── providers/                # Session provider
 │   └── seo/                      # JSON-LD structured data
-├── lib/                          # Utilities & configuration
-│   ├── auth.ts                   # NextAuth configuration
+├── lib/
+│   ├── auth.ts                   # NextAuth config (JWT with plan field)
 │   ├── db.ts                     # MongoDB connection singleton
+│   ├── stripe.ts                 # Stripe client singleton
 │   ├── rate-limit.ts             # IP-based rate limiter
 │   ├── email.ts                  # Nodemailer email service
 │   ├── analytics.ts              # UA parsing, IP hashing
@@ -202,13 +264,14 @@ src/
 │   ├── toast.ts                  # SweetAlert2 notifications
 │   ├── constants.ts              # App-wide constants
 │   └── utils.ts                  # Helper functions
-├── models/                       # Mongoose schemas
-│   ├── User.ts                   # User model
-│   ├── Link.ts                   # Link model with click counter
-│   ├── Click.ts                  # Click analytics model
-│   └── PasswordReset.ts          # Reset token with TTL
-└── types/                        # TypeScript definitions
-    └── next-auth.d.ts            # NextAuth type augmentation
+├── models/
+│   ├── User.ts                   # User (name, email, plan, username, bio, stripeId)
+│   ├── Link.ts                   # Link (slug, password, expiry, pinnedToBio, clicks)
+│   ├── Click.ts                  # Click (geo, device, browser, referrer)
+│   └── PasswordReset.ts          # Reset token with TTL index
+└── types/
+    ├── index.ts                  # Shared TypeScript types
+    └── next-auth.d.ts            # NextAuth session augmentation (id + plan)
 ```
 
 ---
@@ -217,80 +280,106 @@ src/
 
 ### Authentication
 
-| Method | Endpoint | Description | Rate Limit |
-|--------|----------|-------------|------------|
-| POST | `/api/auth/signup` | Create new account | 5/min |
-| POST | `/api/auth/[...nextauth]` | Sign in (NextAuth) | — |
-| POST | `/api/auth/forgot-password` | Request password reset | 3/5min |
-| POST | `/api/auth/reset-password` | Reset password with token | 5/min |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/signup` | Create new account | Public |
+| POST | `/api/auth/forgot-password` | Request password reset email | Public |
+| POST | `/api/auth/reset-password` | Reset password with token | Public |
 
 ### Links
 
-| Method | Endpoint | Description | Rate Limit |
-|--------|----------|-------------|------------|
-| GET | `/api/links` | List user's links (paginated) | — |
-| POST | `/api/links` | Create short link | 30/min |
-| GET | `/api/links/[id]` | Get link details | — |
-| PATCH | `/api/links/[id]` | Update link | — |
-| DELETE | `/api/links/[id]` | Delete link + clicks | — |
-| GET | `/api/links/resolve?slug=abc` | Resolve slug to URL | — |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/links` | List user's links (paginated, searchable) | Required |
+| POST | `/api/links` | Create short link (with optional password/expiry) | Required |
+| GET | `/api/links/[id]` | Get link details | Required |
+| PATCH | `/api/links/[id]` | Update link | Required |
+| DELETE | `/api/links/[id]` | Delete link + all clicks | Required |
+| GET | `/api/links/[id]/qr` | Get QR code PNG (or SVG with `?format=svg`) | Required |
+| POST | `/api/links/[id]/pin` | Toggle link pinned to bio | Required |
+| POST | `/api/links/check-password` | Verify link password → returns destination URL | Public |
 
-### Analytics & Tracking
+### Analytics
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/analytics/[linkId]?period=30d` | Get link analytics |
-| POST | `/api/track` | Record click event |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/analytics/[linkId]?period=7d\|30d\|90d\|all` | Full analytics breakdown | Required |
+| POST | `/api/track` | Record click event | Public |
 
-### User
+### AI
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/user` | Get user profile |
-| PATCH | `/api/user` | Update profile/password |
-| DELETE | `/api/user` | Delete account + all data |
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/ai/suggest-slug` | Generate 3 AI slug suggestions for a URL | Required |
+
+### User & Profile
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/user` | Get current user profile + plan | Required |
+| PATCH | `/api/user` | Update name or password | Required |
+| DELETE | `/api/user` | Delete account + all data | Required |
+| GET | `/api/user/profile` | Get bio profile (username, bio, displayName) | Required |
+| PATCH | `/api/user/profile` | Update bio profile | Required |
+| GET | `/api/user/[username]` | Get public user info | Public |
+| GET | `/api/user/[username]/links` | Get user's pinned links | Public |
+
+### Billing
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/billing/checkout` | Create Stripe Checkout session | Required |
+| POST | `/api/billing/portal` | Open Stripe Customer Portal | Required |
+| POST | `/api/billing/verify` | Sync plan from Stripe to DB | Required |
+| POST | `/api/webhooks/stripe` | Handle Stripe events | Stripe sig |
 
 ---
 
 ## Database Schema
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│    Users     │     │    Links     │     │    Clicks    │
-├──────────────┤     ├──────────────┤     ├──────────────┤
-│ _id          │◄────│ userId       │     │ _id          │
-│ name         │     │ _id          │◄────│ linkId       │
-│ email (uniq) │     │ originalUrl  │     │ timestamp    │
-│ password     │     │ slug (uniq)  │     │ ip (hashed)  │
-│ createdAt    │     │ customAlias  │     │ userAgent    │
-│ updatedAt    │     │ title        │     │ country      │
-└──────────────┘     │ totalClicks  │     │ city         │
-                     │ isActive     │     │ device       │
-┌──────────────┐     │ expiresAt    │     │ browser      │
-│ PasswordReset│     │ createdAt    │     │ os           │
-├──────────────┤     │ updatedAt    │     │ referer      │
-│ email        │     └──────────────┘     │ refererDomain│
-│ token (uniq) │                          └──────────────┘
-│ expiresAt    │
-│ used         │
-└──────────────┘
+┌───────────────┐     ┌─────────────────┐     ┌──────────────┐
+│     Users     │     │      Links      │     │    Clicks    │
+├───────────────┤     ├─────────────────┤     ├──────────────┤
+│ _id           │◄────│ userId          │     │ _id          │
+│ name          │     │ _id             │◄────│ linkId       │
+│ email (uniq)  │     │ originalUrl     │     │ timestamp    │
+│ password      │     │ slug (uniq)     │     │ ip (hashed)  │
+│ username      │     │ customAlias     │     │ userAgent    │
+│ displayName   │     │ title           │     │ country      │
+│ bio           │     │ totalClicks     │     │ city         │
+│ plan          │     │ isActive        │     │ device       │
+│ stripeId      │     │ expiresAt       │     │ browser      │
+│ createdAt     │     │ passwordHash    │     │ os           │
+│ updatedAt     │     │ passwordProtect │     │ referer      │
+└───────────────┘     │ pinnedToBio     │     │ refererDomain│
+                      │ createdAt       │     └──────────────┘
+┌───────────────┐     │ updatedAt       │
+│ PasswordReset │     └─────────────────┘
+├───────────────┤
+│ email         │
+│ token (uniq)  │
+│ expiresAt     │
+│ used          │
+└───────────────┘
 ```
 
-**Key indexes:** Composite indexes on `Click` model for efficient aggregation by linkId + country/device/browser/referrer/timestamp.
+**Key indexes:** Compound indexes on `Click` for efficient aggregation by linkId + country/device/browser/referrer/timestamp. Sparse unique index on `User.username`.
 
 ---
 
 ## Security
 
-- **Password Hashing** &mdash; bcrypt with 12 salt rounds
+- **Password Hashing** &mdash; bcrypt with 12 salt rounds for accounts, 10 for link passwords
 - **IP Privacy** &mdash; SHA-256 hashing with secret salt (never stored raw)
 - **Rate Limiting** &mdash; Per-IP fixed-window counters with `429` + `Retry-After` headers
-- **Email Enumeration Prevention** &mdash; Forgot-password always returns the same response
+- **Email Enumeration Prevention** &mdash; Forgot-password always returns identical response
 - **CSRF Protection** &mdash; NextAuth built-in CSRF tokens
-- **JWT Sessions** &mdash; Stateless, signed tokens
-- **Input Validation** &mdash; Zod schemas on all API inputs
+- **JWT Sessions** &mdash; Stateless, signed tokens including plan claim
+- **Input Validation** &mdash; Zod schemas on every API endpoint
 - **Reserved Slugs** &mdash; 24 protected paths prevent slug collisions
 - **TTL Indexes** &mdash; Password reset tokens auto-expire after 1 hour
+- **Stripe Webhook Signature** &mdash; All webhook events verified with signing secret
 
 ---
 
@@ -300,15 +389,26 @@ src/
 
 1. Push your code to GitHub
 2. Go to [vercel.com/new](https://vercel.com/new) and import your repository
-3. Add environment variables in Vercel dashboard:
-   - `MONGODB_URI`
-   - `NEXTAUTH_SECRET`
-   - `NEXTAUTH_URL` (your production URL)
-   - `NEXT_PUBLIC_APP_URL` (same as above)
-   - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+3. Add all environment variables in **Vercel → Settings → Environment Variables**:
+
+```
+MONGODB_URI
+NEXTAUTH_SECRET
+NEXTAUTH_URL              # https://your-app.vercel.app
+NEXT_PUBLIC_APP_URL       # https://your-app.vercel.app
+SMTP_HOST / SMTP_PORT / SMTP_SECURE / SMTP_USER / SMTP_PASS / SMTP_FROM
+ANTHROPIC_API_KEY
+STRIPE_SECRET_KEY
+STRIPE_PUBLISHABLE_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_PRO_PRICE_ID
+```
+
 4. Deploy
 
-> Vercel automatically provides `x-vercel-ip-country` and `x-vercel-ip-city` headers for geographic analytics.
+> **Note:** Use `sk_test_` Stripe keys for development. Switch to `sk_live_` keys (requires Stripe account activation) when ready to charge real customers.
+
+> **Vercel geo headers:** `x-vercel-ip-country` and `x-vercel-ip-city` are provided automatically for geographic analytics.
 
 ---
 
@@ -318,8 +418,10 @@ src/
 - **Denormalized click counter** (`totalClicks`) avoids expensive `COUNT()` queries
 - **Compound MongoDB indexes** for O(log n) analytics aggregation
 - **Fire-and-forget tracking** &mdash; redirects happen instantly, analytics recorded async
-- **Static page generation** for marketing pages
+- **Static generation** for all marketing pages
 - **Connection pooling** with MongoDB singleton pattern
+- **QR code caching** &mdash; 1-hour `Cache-Control` on QR endpoints
+- **AI rate limiting** &mdash; Claude API calls rate-limited per IP
 
 ---
 
@@ -329,7 +431,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
@@ -343,6 +445,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 <div align="center">
 
-Built with Next.js, MongoDB, and TypeScript
+Built with Next.js, MongoDB, TypeScript, and Claude AI
 
 </div>

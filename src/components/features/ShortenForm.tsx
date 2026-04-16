@@ -41,7 +41,7 @@ export function ShortenForm({ showAdvanced = false }: ShortenFormProps) {
       });
       const data = await res.json();
       if (data.slugs) setAiSuggestions(data.slugs);
-    } catch { showError("AI suggestion failed"); }
+    } catch { showError("Could not generate suggestions"); }
     finally { setAiLoading(false); }
   };
 
