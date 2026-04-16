@@ -7,6 +7,7 @@ export interface LinkResponse {
   title: string | null;
   totalClicks: number;
   isActive: boolean;
+  pinnedToBio: boolean;
   expiresAt: string | null;
   createdAt: string;
   updatedAt: string;

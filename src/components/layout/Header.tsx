@@ -17,7 +17,7 @@ export async function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         <Link
           href="/"
-          className="text-xl font-bold text-indigo-600 tracking-tight"
+          className="text-xl font-bold text-violet-600 tracking-tight"
         >
           {APP_NAME}
         </Link>

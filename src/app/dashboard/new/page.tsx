@@ -26,7 +26,7 @@ export default function NewLinkPage() {
       {/* Form Card */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Gradient accent bar */}
-        <div className="h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600" />
+        <div className="h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-violet-600" />
 
         <div className="p-6 sm:p-8">
           <ShortenForm showAdvanced />
@@ -36,7 +36,7 @@ export default function NewLinkPage() {
       {/* Tips */}
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="flex items-start gap-3 p-4 rounded-lg bg-slate-50 border border-slate-100">
-          <div className="shrink-0 p-2 rounded-lg bg-indigo-100 text-indigo-600">
+          <div className="shrink-0 p-2 rounded-lg bg-violet-100 text-violet-600">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.314a4.5 4.5 0 00-6.364-6.364L4.5 8.25l4.5 4.5" />
             </svg>

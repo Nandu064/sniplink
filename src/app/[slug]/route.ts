@@ -13,7 +13,7 @@ export async function GET(
   try {
     await connectDB();
 
-    const link = await Link.findOne({ slug, isActive: true }).lean();
+    const link = await Link.findOne({ slug, isActive: true }).select("+passwordHash").lean();
 
     if (!link) {
       return NextResponse.redirect(new URL("/", request.nextUrl.origin));
@@ -21,6 +21,10 @@ export async function GET(
 
     if (link.expiresAt && new Date(link.expiresAt) < new Date()) {
       return NextResponse.redirect(new URL("/", request.nextUrl.origin));
+    }
+
+    if (link.passwordProtected) {
+      return NextResponse.redirect(new URL(`/protected/${link.slug}`, request.nextUrl.origin));
     }
 
     // Track the click (fire-and-forget, don't block redirect)

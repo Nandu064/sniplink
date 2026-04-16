@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, FormEvent, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -14,7 +14,21 @@ interface UserProfile {
   id: string;
   name: string;
   email: string;
+  plan: "free" | "pro";
   createdAt: string;
+}
+
+function UpgradeSuccessHandler() {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("upgraded") === "true") {
+      showSuccess("You're now on Pro! Welcome to Sniplink Pro.");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("upgraded");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams]);
+  return null;
 }
 
 export default function SettingsPage() {
@@ -22,9 +36,18 @@ export default function SettingsPage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Billing
+  const [billingLoading, setBillingLoading] = useState(false);
+
   // Profile form
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Link-in-Bio form
+  const [username, setUsername] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [savingBio, setSavingBio] = useState(false);
 
   // Password form
   const [currentPassword, setCurrentPassword] = useState("");
@@ -46,6 +69,15 @@ export default function SettingsPage() {
         const data = await res.json();
         setUser(data);
         setName(data.name);
+
+        // Fetch bio profile
+        const bioRes = await fetch("/api/user/profile");
+        if (bioRes.ok) {
+          const bioData = await bioRes.json();
+          setUsername(bioData.username ?? "");
+          setDisplayName(bioData.displayName ?? "");
+          setBio(bioData.bio ?? "");
+        }
       } catch {
         showError("Failed to load profile");
       } finally {
@@ -54,6 +86,40 @@ export default function SettingsPage() {
     }
     fetchProfile();
   }, [router]);
+
+  const handleUpgrade = async () => {
+    setBillingLoading(true);
+    try {
+      const res = await fetch("/api/billing/checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showError(data.error || "Failed to start checkout");
+        setBillingLoading(false);
+      }
+    } catch {
+      showError("Something went wrong");
+      setBillingLoading(false);
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    setBillingLoading(true);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showError(data.error || "Failed to open billing portal");
+        setBillingLoading(false);
+      }
+    } catch {
+      showError("Something went wrong");
+      setBillingLoading(false);
+    }
+  };
 
   const handleUpdateProfile = async (e: FormEvent) => {
     e.preventDefault();
@@ -83,6 +149,46 @@ export default function SettingsPage() {
       showError("Something went wrong");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveBio = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const trimmedUsername = username.trim().toLowerCase();
+    if (trimmedUsername && !/^[a-z0-9_-]{3,30}$/.test(trimmedUsername)) {
+      showError(
+        "Username must be 3–30 characters: letters, numbers, underscores, or hyphens only"
+      );
+      return;
+    }
+
+    setSavingBio(true);
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: trimmedUsername || null,
+          displayName: displayName.trim() || null,
+          bio: bio.trim() || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showError(data.error || "Failed to save Link-in-Bio settings");
+        return;
+      }
+
+      setUsername(data.username ?? "");
+      setDisplayName(data.displayName ?? "");
+      setBio(data.bio ?? "");
+      showSuccess("Link-in-Bio settings saved!");
+    } catch {
+      showError("Something went wrong");
+    } finally {
+      setSavingBio(false);
     }
   };
 
@@ -150,18 +256,81 @@ export default function SettingsPage() {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-28" />
         <Skeleton className="h-48" />
         <Skeleton className="h-64" />
       </div>
     );
   }
 
+  const isPro = user?.plan === "pro";
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      <Suspense fallback={null}>
+        <UpgradeSuccessHandler />
+      </Suspense>
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
         <p className="text-slate-500">Manage your account and preferences</p>
       </div>
+
+      {/* Billing Section */}
+      <Card className={isPro ? "border-violet-200" : ""}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3">
+            Billing
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                isPro
+                  ? "bg-violet-100 text-violet-700"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {isPro ? "Pro" : "Free"}
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              {isPro ? (
+                <>
+                  <p className="text-sm font-medium text-slate-900">Sniplink Pro</p>
+                  <p className="text-sm text-slate-500">
+                    You have access to all Pro features. Manage or cancel anytime.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-medium text-slate-900">Free Plan</p>
+                  <p className="text-sm text-slate-500">
+                    Upgrade to Pro for unlimited links, advanced analytics, AI slugs, and more.
+                  </p>
+                </>
+              )}
+            </div>
+            {isPro ? (
+              <Button
+                onClick={handleManageSubscription}
+                loading={billingLoading}
+                variant="secondary"
+                className="shrink-0"
+              >
+                Manage Subscription
+              </Button>
+            ) : (
+              <button
+                onClick={handleUpgrade}
+                disabled={billingLoading}
+                className="shrink-0 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+              >
+                {billingLoading ? "Redirecting…" : "Upgrade to Pro — $9/mo"}
+              </button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Profile Section */}
       <Card>
@@ -189,6 +358,66 @@ export default function SettingsPage() {
             <div className="flex justify-end">
               <Button type="submit" loading={saving}>
                 Save Changes
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Link-in-Bio Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Link-in-Bio</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSaveBio} className="space-y-4">
+            <div>
+              <Input
+                label="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                placeholder="e.g. johndoe"
+                helperText="Only letters, numbers, underscores, and hyphens (3–30 chars)"
+              />
+              {username.trim() && (
+                <p className="mt-1.5 text-xs text-slate-500">
+                  Your bio page:{" "}
+                  <a
+                    href={`/u/${username.trim().toLowerCase()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-violet-600 hover:underline font-medium"
+                  >
+                    sniplink-green.vercel.app/u/{username.trim().toLowerCase()}
+                  </a>
+                </p>
+              )}
+            </div>
+            <Input
+              label="Display Name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Your public display name"
+            />
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Bio
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell people a bit about yourself"
+                maxLength={200}
+                rows={3}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+              />
+              <p className="text-xs text-slate-400 mt-1 text-right">
+                {bio.length}/200
+              </p>
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit" loading={savingBio}>
+                Save Link-in-Bio
               </Button>
             </div>
           </form>

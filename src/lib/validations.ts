@@ -32,6 +32,7 @@ export const createLinkSchema = z.object({
     .optional(),
   title: z.string().max(200, "Title must be at most 200 characters").optional(),
   expiresAt: z.string().datetime().optional(),
+  password: z.string().min(4, "Password must be at least 4 characters").max(100).optional(),
 });
 
 export const updateLinkSchema = z.object({

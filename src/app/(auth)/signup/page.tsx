@@ -74,7 +74,7 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="text-2xl font-bold text-indigo-600"
+            className="text-2xl font-bold text-violet-600"
           >
             {APP_NAME}
           </Link>
@@ -131,7 +131,7 @@ export default function SignUpPage() {
           Already have an account?{" "}
           <Link
             href="/signin"
-            className="text-indigo-600 font-medium hover:underline"
+            className="text-violet-600 font-medium hover:underline"
           >
             Sign in
           </Link>

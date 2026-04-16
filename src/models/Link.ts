@@ -10,6 +10,9 @@ export interface ILink extends Document {
   totalClicks: number;
   isActive: boolean;
   expiresAt: Date | null;
+  passwordHash: string | null;
+  passwordProtected: boolean;
+  pinnedToBio: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +39,9 @@ const LinkSchema = new Schema<ILink>(
     totalClicks: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
     expiresAt: { type: Date, default: null },
+    passwordHash: { type: String, default: null, select: false },
+    passwordProtected: { type: Boolean, default: false },
+    pinnedToBio: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

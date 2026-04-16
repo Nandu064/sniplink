@@ -101,7 +101,7 @@ export default function TermsPage() {
           Your use of {APP_NAME} is also governed by our{" "}
           <a
             href="/privacy"
-            className="text-indigo-600 hover:text-indigo-700 underline"
+            className="text-violet-600 hover:text-violet-700 underline"
           >
             Privacy Policy
           </a>
@@ -116,7 +116,7 @@ export default function TermsPage() {
           property. The source code is available under the MIT License on{" "}
           <a
             href="https://github.com/Nandu064/sniplink"
-            className="text-indigo-600 hover:text-indigo-700 underline"
+            className="text-violet-600 hover:text-violet-700 underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -162,7 +162,7 @@ export default function TermsPage() {
           If you have questions about these terms, please open an issue on our{" "}
           <a
             href="https://github.com/Nandu064/sniplink"
-            className="text-indigo-600 hover:text-indigo-700 underline"
+            className="text-violet-600 hover:text-violet-700 underline"
             target="_blank"
             rel="noopener noreferrer"
           >

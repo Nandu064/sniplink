@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
     <div className="w-full max-w-md">
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-indigo-600">
+          <Link href="/" className="text-2xl font-bold text-violet-600">
             {APP_NAME}
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-slate-900">
@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
           Remember your password?{" "}
           <Link
             href="/signin"
-            className="text-indigo-600 font-medium hover:underline"
+            className="text-violet-600 font-medium hover:underline"
           >
             Sign in
           </Link>

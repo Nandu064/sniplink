@@ -52,12 +52,12 @@ export default function Home() {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="bg-gradient-to-b from-indigo-50 to-white py-16 sm:py-24">
+        <section className="bg-gradient-to-b from-violet-50 to-white py-16 sm:py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900">
               Shorten Links.
               <br />
-              <span className="text-indigo-600">Track Clicks.</span>
+              <span className="text-violet-600">Track Clicks.</span>
               <br />
               Grow Faster.
             </h1>
@@ -86,7 +86,7 @@ export default function Home() {
                   key={feature.title}
                   className="bg-white rounded-lg border border-slate-200 p-6 hover:shadow-md transition-shadow"
                 >
-                  <div className="text-indigo-600 mb-4">{feature.icon}</div>
+                  <div className="text-violet-600 mb-4">{feature.icon}</div>
                   <h3 className="text-lg font-semibold text-slate-900">
                     {feature.title}
                   </h3>
@@ -106,7 +106,7 @@ export default function Home() {
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
               {steps.map((step) => (
                 <div key={step.number} className="text-center">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-lg font-bold">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-violet-600 text-white flex items-center justify-center text-lg font-bold">
                     {step.number}
                   </div>
                   <h3 className="mt-4 text-lg font-semibold text-slate-900">
@@ -120,18 +120,18 @@ export default function Home() {
         </section>
 
         {/* CTA */}
-        <section className="py-16 sm:py-24 bg-indigo-600">
+        <section className="py-16 sm:py-24 bg-violet-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-2xl sm:text-3xl font-semibold text-white">
               Ready to Start Shortening?
             </h2>
-            <p className="mt-4 text-indigo-100 text-lg">
+            <p className="mt-4 text-violet-100 text-lg">
               Join thousands of users who trust Sniplink for their link
               management.
             </p>
             <Link
               href="/signup"
-              className="mt-8 inline-flex items-center gap-2 bg-white text-indigo-600 px-8 py-3 rounded-md font-medium text-lg hover:bg-indigo-50 transition-colors"
+              className="mt-8 inline-flex items-center gap-2 bg-white text-violet-600 px-8 py-3 rounded-md font-medium text-lg hover:bg-violet-50 transition-colors"
             >
               Get Started Free
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

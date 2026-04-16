@@ -161,7 +161,7 @@ export default function PrivacyPage() {
           open an issue on our{" "}
           <a
             href="https://github.com/Nandu064/sniplink"
-            className="text-indigo-600 hover:text-indigo-700 underline"
+            className="text-violet-600 hover:text-violet-700 underline"
             target="_blank"
             rel="noopener noreferrer"
           >

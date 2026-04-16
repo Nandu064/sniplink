@@ -13,7 +13,7 @@ function StatCard({ label, value, icon }: StatCardProps) {
   return (
     <Card>
       <CardContent className="flex items-center gap-4">
-        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+        <div className="p-2 rounded-lg bg-violet-50 text-violet-600">
           {icon}
         </div>
         <div>

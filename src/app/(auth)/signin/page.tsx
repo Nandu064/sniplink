@@ -46,7 +46,7 @@ export default function SignInPage() {
         <div className="text-center mb-8">
           <Link
             href="/"
-            className="text-2xl font-bold text-indigo-600"
+            className="text-2xl font-bold text-violet-600"
           >
             {APP_NAME}
           </Link>
@@ -81,7 +81,7 @@ export default function SignInPage() {
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-xs text-indigo-600 hover:underline"
+              className="text-xs text-violet-600 hover:underline"
             >
               Forgot password?
             </Link>
@@ -96,7 +96,7 @@ export default function SignInPage() {
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="text-indigo-600 font-medium hover:underline"
+            className="text-violet-600 font-medium hover:underline"
           >
             Sign up
           </Link>

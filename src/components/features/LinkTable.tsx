@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -23,6 +24,28 @@ interface LinkTableProps {
 
 export function LinkTable({ links, onDelete }: LinkTableProps) {
   const router = useRouter();
+  const [pinned, setPinned] = useState<Record<string, boolean>>(
+    Object.fromEntries(links.map((l) => [l.id, l.pinnedToBio ?? false]))
+  );
+  const [pinning, setPinning] = useState<Record<string, boolean>>({});
+
+  const handleTogglePin = async (id: string) => {
+    setPinning((prev) => ({ ...prev, [id]: true }));
+    try {
+      const res = await fetch(`/api/links/${id}/pin`, { method: "POST" });
+      if (!res.ok) {
+        showError("Failed to update pin status");
+        return;
+      }
+      const data = await res.json();
+      setPinned((prev) => ({ ...prev, [id]: data.pinnedToBio }));
+      showSuccess(data.pinnedToBio ? "Pinned to bio!" : "Unpinned from bio");
+    } catch {
+      showError("Something went wrong");
+    } finally {
+      setPinning((prev) => ({ ...prev, [id]: false }));
+    }
+  };
 
   const handleDelete = async (id: string) => {
     const confirmed = await confirmDelete();
@@ -67,6 +90,7 @@ export function LinkTable({ links, onDelete }: LinkTableProps) {
           <TableHead>Clicks</TableHead>
           <TableHead className="hidden md:table-cell">Created</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead className="hidden sm:table-cell w-12 text-center">Pin</TableHead>
           <TableHead className="w-12" />
         </TableRow>
       </TableHeader>
@@ -75,7 +99,7 @@ export function LinkTable({ links, onDelete }: LinkTableProps) {
           <TableRow key={link.id}>
             <TableCell>
               <div className="flex items-center gap-1">
-                <span className="text-indigo-600 font-medium">
+                <span className="text-violet-600 font-medium">
                   /{link.slug}
                 </span>
                 <CopyButton text={link.shortUrl} />
@@ -103,6 +127,19 @@ export function LinkTable({ links, onDelete }: LinkTableProps) {
               <Badge variant={link.isActive ? "success" : "error"}>
                 {link.isActive ? "Active" : "Inactive"}
               </Badge>
+            </TableCell>
+            <TableCell className="hidden sm:table-cell text-center">
+              <button
+                onClick={() => handleTogglePin(link.id)}
+                disabled={pinning[link.id]}
+                title={pinned[link.id] ? "Unpin from bio" : "Pin to bio"}
+                className={`text-lg leading-none transition-opacity ${
+                  pinning[link.id] ? "opacity-40 cursor-not-allowed" : "hover:scale-125"
+                } ${pinned[link.id] ? "opacity-100" : "opacity-30 hover:opacity-70"}`}
+                style={{ transition: "transform 0.1s, opacity 0.15s" }}
+              >
+                📌
+              </button>
             </TableCell>
             <TableCell>
               <Dropdown

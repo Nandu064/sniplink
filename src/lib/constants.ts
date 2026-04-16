@@ -38,8 +38,8 @@ export const BCRYPT_SALT_ROUNDS = 12;
 export const LINKS_PER_PAGE = 10;
 
 export const CHART_COLORS = [
-  "#4F46E5",
-  "#8B5CF6",
+  "#7C3AED",
+  "#A855F7",
   "#10B981",
   "#F59E0B",
   "#64748B",

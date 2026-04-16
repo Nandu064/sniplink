@@ -45,7 +45,7 @@ export function HeaderAuth({ session }: HeaderAuthProps) {
         </Link>
         <Dropdown
           trigger={
-            <button className="h-8 w-8 rounded-full bg-indigo-100 text-indigo-700 font-medium text-sm flex items-center justify-center">
+            <button className="h-8 w-8 rounded-full bg-violet-100 text-violet-700 font-medium text-sm flex items-center justify-center">
               {session.user.name?.[0]?.toUpperCase() || "U"}
             </button>
           }

@@ -6,6 +6,7 @@ import { createLinkSchema } from "@/lib/validations";
 import { generateSlug } from "@/lib/utils";
 import { RESERVED_SLUGS, LINKS_PER_PAGE, BASE_URL } from "@/lib/constants";
 import { apiLimiter } from "@/lib/rate-limit";
+import bcrypt from "bcryptjs";
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
       title: link.title,
       totalClicks: link.totalClicks,
       isActive: link.isActive,
+      pinnedToBio: link.pinnedToBio ?? false,
       expiresAt: link.expiresAt?.toISOString() || null,
       createdAt: link.createdAt.toISOString(),
       updatedAt: link.updatedAt.toISOString(),
@@ -85,7 +87,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { url, slug: customSlug, title, expiresAt } = result.data;
+    const { url, slug: customSlug, title, expiresAt, password } = result.data;
+    const passwordHash = password ? await bcrypt.hash(password, 10) : null;
 
     await connectDB();
 
@@ -124,6 +127,8 @@ export async function POST(request: NextRequest) {
       customAlias,
       title: title || null,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
+      passwordHash,
+      passwordProtected: !!password,
     });
 
     return NextResponse.json(
@@ -137,6 +142,7 @@ export async function POST(request: NextRequest) {
         totalClicks: link.totalClicks,
         isActive: link.isActive,
         expiresAt: link.expiresAt?.toISOString() || null,
+        passwordProtected: link.passwordProtected,
         createdAt: link.createdAt.toISOString(),
         updatedAt: link.updatedAt.toISOString(),
       },

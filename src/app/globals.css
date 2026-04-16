@@ -15,8 +15,8 @@ body {
 
 /* Text selection color */
 ::selection {
-  background-color: #c7d2fe;
-  color: #312e81;
+  background-color: #ddd6fe;
+  color: #4c1d95;
 }
 
 /* All interactive elements should use pointer cursor */
@@ -63,7 +63,7 @@ button:disabled,
 
 /* Focus visible outline for keyboard navigation */
 :focus-visible {
-  outline: 2px solid #4F46E5;
+  outline: 2px solid #7C3AED;
   outline-offset: 2px;
 }
 

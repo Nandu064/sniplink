@@ -25,6 +25,7 @@ export async function GET() {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
+      plan: user.plan ?? "free",
       createdAt: user.createdAt.toISOString(),
     });
   } catch {
