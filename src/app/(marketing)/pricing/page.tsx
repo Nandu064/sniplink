@@ -16,7 +16,6 @@ const FREE_FEATURES = [
 const PRO_FEATURES = [
   "Unlimited short links",
   "Advanced analytics & insights",
-  "AI-generated slugs",
   "Link-in-Bio page",
   "Password-protected links",
   "Geographic & device data",
@@ -25,13 +24,7 @@ const PRO_FEATURES = [
 
 function CheckIcon({ className }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
   );
@@ -77,11 +70,8 @@ export default function PricingPage() {
               <span className="text-5xl font-bold text-slate-900">$0</span>
               <span className="text-slate-500 text-sm">/ forever</span>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Everything you need to get started.
-            </p>
+            <p className="mt-2 text-sm text-slate-500">Everything you need to get started.</p>
           </div>
-
           <ul className="mt-8 space-y-3 flex-1">
             {FREE_FEATURES.map((feature) => (
               <li key={feature} className="flex items-center gap-3 text-slate-700 text-sm">
@@ -90,7 +80,6 @@ export default function PricingPage() {
               </li>
             ))}
           </ul>
-
           <Link href="/signup" className="block mt-8">
             <Button variant="secondary" className="w-full" size="lg">
               Get Started Free
@@ -100,24 +89,19 @@ export default function PricingPage() {
 
         {/* Pro Plan */}
         <div className="relative bg-white rounded-2xl border-2 border-violet-600 shadow-lg p-8 flex flex-col">
-          {/* Most Popular badge */}
           <div className="absolute -top-4 left-1/2 -translate-x-1/2">
             <span className="bg-violet-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow">
               Most Popular
             </span>
           </div>
-
           <div>
             <h3 className="text-lg font-semibold text-violet-600">Pro</h3>
             <div className="mt-4 flex items-baseline gap-1">
               <span className="text-5xl font-bold text-slate-900">$9</span>
               <span className="text-slate-500 text-sm">/ month</span>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
-              For power users and growing teams.
-            </p>
+            <p className="mt-2 text-sm text-slate-500">For power users and growing teams.</p>
           </div>
-
           <ul className="mt-8 space-y-3 flex-1">
             {PRO_FEATURES.map((feature) => (
               <li key={feature} className="flex items-center gap-3 text-slate-700 text-sm">
@@ -126,7 +110,6 @@ export default function PricingPage() {
               </li>
             ))}
           </ul>
-
           <button
             onClick={handleUpgrade}
             disabled={upgrading}

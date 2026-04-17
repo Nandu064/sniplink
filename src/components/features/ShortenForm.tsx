@@ -26,24 +26,6 @@ export function ShortenForm({ showAdvanced = false }: ShortenFormProps) {
     slug: string;
     passwordProtected?: boolean;
   } | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-
-  const handleAiSuggest = async () => {
-    if (!url) { showError("Enter a URL first"); return; }
-    setAiLoading(true);
-    setAiSuggestions([]);
-    try {
-      const res = await fetch("/api/ai/suggest-slug", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      const data = await res.json();
-      if (data.slugs) setAiSuggestions(data.slugs);
-    } catch { showError("Could not generate suggestions"); }
-    finally { setAiLoading(false); }
-  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -178,27 +160,9 @@ export function ShortenForm({ showAdvanced = false }: ShortenFormProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Custom Alias */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-semibold text-slate-800">
-                Custom Alias
-              </label>
-              <button
-                type="button"
-                onClick={handleAiSuggest}
-                disabled={aiLoading}
-                className="inline-flex items-center gap-1 text-xs px-2.5 py-1 border border-violet-300 text-violet-700 rounded-full hover:bg-violet-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {aiLoading ? (
-                  <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                ) : (
-                  <span>✨</span>
-                )}
-                AI Suggest
-              </button>
-            </div>
+            <label className="block text-sm font-semibold text-slate-800 mb-2">
+              Custom Alias
+            </label>
             <div className="flex">
               <span className="inline-flex items-center text-sm text-slate-500 bg-slate-50 border border-r-0 border-slate-300 rounded-l-lg px-3 whitespace-nowrap">
                 {BASE_URL.replace(/^https?:\/\//, "")}/
@@ -211,21 +175,7 @@ export function ShortenForm({ showAdvanced = false }: ShortenFormProps) {
                 className="flex-1 min-w-0 rounded-r-lg border border-slate-300 px-3 py-2.5 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-shadow"
               />
             </div>
-            {aiSuggestions.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {aiSuggestions.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setSlug(s)}
-                    className="text-xs px-2 py-1 bg-violet-50 text-violet-700 border border-violet-200 rounded-full hover:bg-violet-100 transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
-            <p className="mt-1.5 text-xs text-slate-400">Letters, numbers, hyphens & underscores only</p>
+            <p className="mt-1.5 text-xs text-slate-400">Letters, numbers, hyphens &amp; underscores only</p>
           </div>
 
           {/* Title */}
