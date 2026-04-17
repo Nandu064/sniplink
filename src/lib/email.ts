@@ -5,11 +5,10 @@ const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 const IS_DEV = process.env.NODE_ENV !== "production";
 
-// Warn at startup if SMTP is not configured
 if (!SMTP_USER || !SMTP_PASS) {
   console.warn(
     "\x1b[33m⚠ SMTP credentials not configured. Password reset emails will not be sent.\n" +
-      "  Add SMTP_USER and SMTP_PASS to .env.local (see .env.example)\x1b[0m"
+      "  Add SMTP_USER and SMTP_PASS to .env.local\x1b[0m"
   );
 }
 
@@ -24,7 +23,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const FROM_EMAIL =
-  process.env.SMTP_FROM || `${APP_NAME} <noreply@sniplink.com>`;
+  process.env.SMTP_FROM || `${APP_NAME} Support Team <noreply@sniplink.com>`;
 
 export async function sendPasswordResetEmail(
   email: string,
@@ -44,13 +43,12 @@ export async function sendPasswordResetEmail(
     console.log("\x1b[0m");
   }
 
-  // Skip sending if SMTP is not configured
   if (!SMTP_USER || !SMTP_PASS) {
     console.warn("⚠ Skipping email send — SMTP not configured.");
     return;
   }
 
-  const info = await transporter.sendMail({
+  await transporter.sendMail({
     from: FROM_EMAIL,
     to: email,
     subject: `Reset your ${APP_NAME} password`,
@@ -69,7 +67,7 @@ export async function sendPasswordResetEmail(
                   <!-- Logo -->
                   <tr>
                     <td align="center" style="padding-bottom: 32px;">
-                      <span style="font-size: 28px; font-weight: 800; color: #4F46E5; letter-spacing: -0.02em;">${APP_NAME}</span>
+                      <span style="font-size: 28px; font-weight: 800; color: #7C3AED; letter-spacing: -0.02em;">${APP_NAME}</span>
                     </td>
                   </tr>
                   <!-- Card -->
@@ -79,25 +77,24 @@ export async function sendPasswordResetEmail(
                         Reset your password
                       </h1>
                       <p style="margin: 0 0 24px; font-size: 15px; color: #64748b; line-height: 1.6;">
-                        We received a request to reset the password for your account. Click the button below to choose a new password.
+                        We received a request to reset the password for your ${APP_NAME} account. Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.
                       </p>
                       <table width="100%" cellpadding="0" cellspacing="0">
                         <tr>
                           <td align="center" style="padding-bottom: 24px;">
-                            <a href="${resetUrl}" style="display: inline-block; background-color: #4F46E5; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 12px 32px; border-radius: 8px;">
+                            <a href="${resetUrl}" style="display: inline-block; background-color: #7C3AED; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 13px 36px; border-radius: 8px;">
                               Reset Password
                             </a>
                           </td>
                         </tr>
                       </table>
                       <p style="margin: 0 0 16px; font-size: 13px; color: #94a3b8; line-height: 1.5;">
-                        This link will expire in <strong>1 hour</strong>. If you didn't request a password reset, you can safely ignore this email.
+                        If you didn't request a password reset, you can safely ignore this email — your password won't change.
                       </p>
                       <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
                       <p style="margin: 0; font-size: 12px; color: #cbd5e1; line-height: 1.5;">
-                        If the button doesn't work, copy and paste this link into your browser:
-                        <br />
-                        <a href="${resetUrl}" style="color: #4F46E5; word-break: break-all;">${resetUrl}</a>
+                        If the button doesn't work, paste this link into your browser:<br />
+                        <a href="${resetUrl}" style="color: #7C3AED; word-break: break-all;">${resetUrl}</a>
                       </p>
                     </td>
                   </tr>
@@ -105,7 +102,7 @@ export async function sendPasswordResetEmail(
                   <tr>
                     <td align="center" style="padding-top: 24px;">
                       <p style="margin: 0; font-size: 12px; color: #94a3b8;">
-                        &copy; ${new Date().getFullYear()} ${APP_NAME}. All rights reserved.
+                        &copy; ${new Date().getFullYear()} ${APP_NAME} Support Team. All rights reserved.
                       </p>
                     </td>
                   </tr>
