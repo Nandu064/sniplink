@@ -19,7 +19,7 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, select: false },
-    username: { type: String, default: null, unique: true, sparse: true, lowercase: true, trim: true, match: /^[a-z0-9_-]+$/ },
+    username: { type: String, default: undefined, unique: true, sparse: true, lowercase: true, trim: true, match: /^[a-z0-9_-]+$/ },
     bio: { type: String, default: null, maxlength: 200 },
     displayName: { type: String, default: null, maxlength: 100 },
     plan: { type: String, enum: ['free', 'pro'], default: 'free' },
